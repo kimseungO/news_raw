@@ -29,7 +29,6 @@ RUN pip install --no-cache-dir -r requirements_py38.txt
 COPY .env .
 COPY naverapi.py .
 COPY news_cluster.py .
-COPY db_input.py .
 
 # 데이터 파일이 저장될 디렉토리를 생성합니다.
 # 이 디렉토리는 docker-compose.yml에서 호스트의 'data' 디렉토리와 마운트될 것입니다.
@@ -37,4 +36,4 @@ RUN mkdir -p /app/data
 
 # 컨테이너가 시작될 때 실행될 기본 명령을 정의합니다.
 # 이 이미지는 initContainer로 사용될 것이므로, 필요한 스크립트들을 순서대로 실행합니다.
-CMD ["bash", "-c", "python3 naverapi.py && python3 news_cluster.py && python3 db_input.py"]
+CMD ["bash", "-c", "python3 naverapi.py && python3 news_cluster.py"]
