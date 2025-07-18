@@ -166,86 +166,86 @@ print(f"✅ 총 {len(df)}개의 뉴스를 '/app/data/news_1000_results.xlsx'로 
 
 ########## DB ############
 
-# KUBERNETES_SERVICE_HOST 환경 변수가 정의되어 있지 않으면
-# 'backend/.env' 파일에서 환경 변수를 로드합니다.
-# Docker 환경에서는 이 변수가 정의될 가능성이 높으므로, 로컬 개발 환경에서 유용합니다.
-if os.environ.get("KUBERNETES_SERVICE_HOST") is None:
-    # .env 파일의 경로를 명시적으로 지정합니다.
-    # 프로젝트 구조에 따라 'backend/.env' 대신 '.env'만 필요할 수도 있습니다.
-    # 예: load_dotenv(dotenv_path=".env")
-    load_dotenv(dotenv_path=".env")
+# # KUBERNETES_SERVICE_HOST 환경 변수가 정의되어 있지 않으면
+# # 'backend/.env' 파일에서 환경 변수를 로드합니다.
+# # Docker 환경에서는 이 변수가 정의될 가능성이 높으므로, 로컬 개발 환경에서 유용합니다.
+# if os.environ.get("KUBERNETES_SERVICE_HOST") is None:
+#     # .env 파일의 경로를 명시적으로 지정합니다.
+#     # 프로젝트 구조에 따라 'backend/.env' 대신 '.env'만 필요할 수도 있습니다.
+#     # 예: load_dotenv(dotenv_path=".env")
+#     load_dotenv(dotenv_path=".env")
 
-# MySQL 연결 설정
-# 환경 변수가 설정되어 있지 않을 경우를 대비하여 .get() 메서드를 사용하고 기본값을 제공하는 것이 좋습니다.
-try:
-    conn = mysql.connector.connect(
-        host=os.environ.get("DB_HOST", "localhost"), # 환경 변수 없으면 'localhost' 기본값
-        user=os.environ.get("DB_USER", "root"),       # 환경 변수 없으면 'root' 기본값
-        password=os.environ.get("DB_PASSWORD", ""),   # 환경 변수 없으면 빈 문자열 기본값
-        database=os.environ.get("DB_NAME", "test_db"), # 환경 변수 없으면 'test_db' 기본값
-    )
-    cursor = conn.cursor()
-    print("✅ 데이터베이스 연결 성공!")
-except mysql.connector.Error as err:
-    print(f"❌ 데이터베이스 연결 오류: {err}")
-    # 오류 발생 시 프로그램 종료 또는 적절한 예외 처리
-    exit()
+# # MySQL 연결 설정
+# # 환경 변수가 설정되어 있지 않을 경우를 대비하여 .get() 메서드를 사용하고 기본값을 제공하는 것이 좋습니다.
+# try:
+#     conn = mysql.connector.connect(
+#         host=os.environ.get("DB_HOST", "localhost"), # 환경 변수 없으면 'localhost' 기본값
+#         user=os.environ.get("DB_USER", "root"),       # 환경 변수 없으면 'root' 기본값
+#         password=os.environ.get("DB_PASSWORD", ""),   # 환경 변수 없으면 빈 문자열 기본값
+#         database=os.environ.get("DB_NAME", "test_db"), # 환경 변수 없으면 'test_db' 기본값
+#     )
+#     cursor = conn.cursor()
+#     print("✅ 데이터베이스 연결 성공!")
+# except mysql.connector.Error as err:
+#     print(f"❌ 데이터베이스 연결 오류: {err}")
+#     # 오류 발생 시 프로그램 종료 또는 적절한 예외 처리
+#     exit()
 
-# news_raw 테이블 생성 (없을 경우)
-create_table_sql = """
-CREATE TABLE IF NOT EXISTS news_raw (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title TEXT,
-    url VARCHAR(767) UNIQUE, -- UNIQUE 인덱스 추가 (TEXT 타입에 직접 인덱스 불가, VARCHAR 길이 제한)
-    contents LONGTEXT,       -- LONGTEXT로 변경
-    thumbnail TEXT,
-    company VARCHAR(100),
-    subject VARCHAR(10),
-    upload_date DATETIME
-);
-"""
-try:
-    cursor.execute(create_table_sql)
-    conn.commit()
-    print("✅ 'news_raw' 테이블 확인/생성 완료!")
-except mysql.connector.Error as err:
-    print(f"❌ 테이블 생성 오류: {err}")
-    exit()
+# # news_raw 테이블 생성 (없을 경우)
+# create_table_sql = """
+# CREATE TABLE IF NOT EXISTS news_raw (
+#     id INT AUTO_INCREMENT PRIMARY KEY,
+#     title TEXT,
+#     url VARCHAR(767) UNIQUE, -- UNIQUE 인덱스 추가 (TEXT 타입에 직접 인덱스 불가, VARCHAR 길이 제한)
+#     contents LONGTEXT,       -- LONGTEXT로 변경
+#     thumbnail TEXT,
+#     company VARCHAR(100),
+#     subject VARCHAR(10),
+#     upload_date DATETIME
+# );
+# """
+# try:
+#     cursor.execute(create_table_sql)
+#     conn.commit()
+#     print("✅ 'news_raw' 테이블 확인/생성 완료!")
+# except mysql.connector.Error as err:
+#     print(f"❌ 테이블 생성 오류: {err}")
+#     exit()
 
-# INSERT 쿼리
-insert_sql = """
-INSERT INTO news_raw (title, url, contents, thumbnail, company, subject, upload_date)
-VALUES (%s, %s, %s, %s, %s, %s, %s)
-ON DUPLICATE KEY UPDATE
-    title = VALUES(title),
-    contents = VALUES(contents),
-    thumbnail = VALUES(thumbnail),
-    company = VALUES(company),
-    subject = VALUES(subject),
-    upload_date = VALUES(upload_date)
-"""
+# # INSERT 쿼리
+# insert_sql = """
+# INSERT INTO news_raw (title, url, contents, thumbnail, company, subject, upload_date)
+# VALUES (%s, %s, %s, %s, %s, %s, %s)
+# ON DUPLICATE KEY UPDATE
+#     title = VALUES(title),
+#     contents = VALUES(contents),
+#     thumbnail = VALUES(thumbnail),
+#     company = VALUES(company),
+#     subject = VALUES(subject),
+#     upload_date = VALUES(upload_date)
+# """
 
-for news in news_data:
-    try:
-        cursor.execute(insert_sql, (
-            news['title'],
-            news['url'],
-            news['contents'],
-            news['thumbnail'],
-            news['company'],
-            news['subject'],
-            pd.to_datetime(news['upload_date'])  # pubDate 문자열 → datetime 변환
-        ))
-    except Exception as e:
-        print("❌ INSERT 실패:", e)
-        continue
+# for news in news_data:
+#     try:
+#         cursor.execute(insert_sql, (
+#             news['title'],
+#             news['url'],
+#             news['contents'],
+#             news['thumbnail'],
+#             news['company'],
+#             news['subject'],
+#             pd.to_datetime(news['upload_date'])  # pubDate 문자열 → datetime 변환
+#         ))
+#     except Exception as e:
+#         print("❌ INSERT 실패:", e)
+#         continue
 
-conn.commit()
-print("✅ DB에 뉴스 데이터 저장 완료!")
+# conn.commit()
+# print("✅ DB에 뉴스 데이터 저장 완료!")
 
-######### 정리 ############
-if 'cursor' in locals() and cursor:
-    cursor.close()
-if 'conn' in locals() and conn:
-    conn.close()
-print("✅ 데이터베이스 연결 종료.")
+# ######### 정리 ############
+# if 'cursor' in locals() and cursor:
+#     cursor.close()
+# if 'conn' in locals() and conn:
+#     conn.close()
+# print("✅ 데이터베이스 연결 종료.")
